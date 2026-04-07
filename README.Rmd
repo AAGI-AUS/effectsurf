@@ -1,0 +1,183 @@
+---
+output: github_document
+---
+
+<!-- README.md is generated from README.Rmd. Please edit that file -->
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.path = "man/figures/README-",
+  out.width = "100%"
+)
+```
+
+# effectsurf
+
+<!-- badges: start -->
+[![R-CMD-check](https://github.com/AAGI-AUS/effectsurf/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/AAGI-AUS/effectsurf/actions/workflows/R-CMD-check.yaml)
+[![codecov](https://codecov.io/gh/AAGI-AUS/effectsurf/graph/badge.svg)](https://codecov.io/gh/AAGI-AUS/effectsurf)
+<!-- badges: end -->
+
+The goal of {effectsurf} is to extend traditional 2D estimated marginal means (EMMs) into interactive 3D **Estimated Marginal Surfaces** (EMS).
+It provides model-agnostic visualisation of predictions, conditional effect sizes, and conditional average treatment effects (CATE) from fitted statistical models.
+
+Surfaces are rendered as interactive [plotly](https://plotly.com/r/) 3D charts with:
+
+- **Categorical stratification** -- overlaid surfaces by group
+- **Confidence envelopes** -- upper/lower CI surfaces
+- **2D profile projections** -- slices through the 3D surface
+- **Derivative surfaces** -- sensitivity, curvature, and interaction maps
+- **Post-prediction smoothing** -- smooth jagged surfaces from non-smooth models (e.g., random forests) via `mgcv::gam()` surrogates
+
+Supports 100+ model classes via [marginaleffects](https://marginaleffects.com/), with optional [emmeans](https://cran.r-project.org/package=emmeans) and [gratia](https://gavinsimpson.github.io/gratia/) backends.
+
+## Installation
+
+You can install the development version of {effectsurf} from [GitHub](https://github.com/AAGI-AUS/effectsurf) with:
+
+```{r install, eval = FALSE}
+if (!require("pak")) {
+  install.packages("pak")
+}
+
+pak::pak("AAGI-AUS/effectsurf")
+```
+
+## Getting started
+
+{effectsurf} works with any fitted model that supports `predict()`.
+Here is a minimal example using a GAM fitted with {mgcv}:
+
+### Fit a model
+
+```{r fit-model}
+library(effectsurf)
+
+model <- mgcv::gam(
+  mpg ~ s(wt) + s(hp) + factor(cyl),
+  data = mtcars
+)
+```
+
+### Create a prediction surface
+
+```{r prediction-surface}
+es <- surf_prediction(
+  model,
+  x = "wt", y = "hp",
+  x_length = 30, y_length = 30,
+  labels = list(
+    x = "Weight (1000 lbs)",
+    y = "Horsepower",
+    z = "Fuel efficiency (mpg)"
+  )
+)
+es
+```
+
+### Visualise interactively
+
+```{r plot, eval = FALSE}
+plot(es)
+```
+
+This opens an interactive 3D surface in your browser or RStudio viewer.
+Drag to rotate, scroll to zoom, hover for values.
+
+### Stratified surfaces
+
+Overlay surfaces by a categorical variable to visualise interactions:
+
+```{r stratified}
+es_strat <- surf_prediction(
+  model,
+  x = "wt", y = "hp",
+  by = "cyl",
+  x_length = 25, y_length = 25,
+  labels = list(
+    x = "Weight (1000 lbs)",
+    y = "Horsepower",
+    z = "Fuel efficiency (mpg)",
+    title = "Prediction surface by cylinder count"
+  )
+)
+es_strat
+```
+
+```{r plot-strat, eval = FALSE}
+plot(es_strat, opacity = 0.85)
+```
+
+### Export to self-contained HTML
+
+```{r export, eval = FALSE}
+surf_export(es, "my_surface.html")
+```
+
+## Core functions
+
+| Function | Purpose |
+|----------|---------|
+| `surf_prediction()` | Prediction surface (fitted values across x, y) |
+| `surf_comparison()` | Treatment effect surface (contrasts between groups) |
+| `surf_slopes()` | Marginal effect surface (partial derivatives) |
+| `surf_sensitivity()` | CATE surface (where does treatment work best?) |
+| `surf_cate()` | CATE from causal models (e.g., causal forests) |
+| `surf_derivatives()` | Gradient, curvature, and interaction maps |
+| `surf_profile()` | 2D profile slices from a 3D surface |
+| `surf_contour()` | 2D contour plot |
+| `surf_optimum()` | Find the (x, y) combination that maximises/minimises z |
+| `surf_export()` | Export to self-contained HTML |
+
+All `surf_*()` functions support the `smooth` parameter for post-prediction
+surface smoothing via `mgcv::gam()` -- useful for random forests, boosted
+trees, and other non-smooth models.
+
+## Agricultural example
+
+{effectsurf} includes a bundled `barley_trials` dataset simulated from
+Australian barley trial data (GRDC Project UCS2301-002RTX).
+
+```{r barley}
+data(barley_trials)
+
+m_barley <- mgcv::gam(
+  yield ~ s(rainfall, k = 5) + nitrogen + seedrate +
+    variety_type + state + nitrogen:variety_type +
+    s(trial, bs = "re"),
+  data = barley_trials,
+  method = "REML"
+)
+
+es_barley <- surf_prediction(
+  m_barley,
+  x = "nitrogen", y = "rainfall",
+  by = "variety_type",
+  x_length = 30, y_length = 30,
+  labels = list(
+    x = "Nitrogen applied (kg/ha)",
+    y = "April-October rainfall (mm)",
+    z = "Grain yield (t/ha)",
+    title = "Yield response surface by variety type"
+  )
+)
+summary(es_barley)
+```
+
+```{r barley-plot, eval = FALSE}
+plot(es_barley, opacity = 0.85)
+```
+
+## Citation
+
+```{r citation, comment = ""}
+citation("effectsurf")
+```
+
+## Code of Conduct
+
+Please note that this project is released with a [Contributor Code of
+Conduct](https://www.contributor-covenant.org/version/2/1/code_of_conduct/).
+By participating in this project you agree to abide by its terms.

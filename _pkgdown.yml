@@ -1,0 +1,52 @@
+url: https://aagi-aus.github.io/effectsurf/
+template:
+  bootstrap: 5
+
+reference:
+  - title: "Surface Constructors"
+    desc: "Create 3D effect surfaces from fitted models."
+    contents:
+      - surf_prediction
+      - surf_comparison
+      - surf_slopes
+      - surf_sensitivity
+      - surf_cate
+      - surf_derivatives
+  - title: "Visualisation & Export"
+    desc: "Plot, project, and export surfaces."
+    contents:
+      - plot.effectsurf
+      - surf_contour
+      - surf_profile
+      - surf_export
+  - title: "Analysis"
+    desc: "Extract data, find optima, and compare surfaces."
+    contents:
+      - surf_data
+      - surf_optimum
+      - surf_compare
+      - surf_tidy
+      - es_meta
+      - coef.effectsurf
+  - title: "Computation Layer"
+    desc: "Lower-level grid and prediction functions."
+    contents:
+      - ems_grid
+      - ems_predict
+  - title: "Class & Constructors"
+    desc: "The effectsurf S3 class."
+    contents:
+      - new_effectsurf
+      - is_effectsurf
+      - print.effectsurf
+      - summary.effectsurf
+  - title: "Utilities"
+    desc: "Helper and transform functions."
+    contents:
+      - expit
+      - logit
+      - label_format
+  - title: "Data"
+    desc: "Example datasets bundled with the package."
+    contents:
+      - barley_trials

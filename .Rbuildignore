@@ -9,5 +9,6 @@
 ^\.lintr$
 ^codecov\.yml$
 ^README\.Rmd$
+^README\.html$
 ^CONTRIBUTING\.md$
 ^CODE_OF_CONDUCT\.md$

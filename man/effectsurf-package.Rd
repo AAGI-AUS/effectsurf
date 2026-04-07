@@ -11,6 +11,7 @@ Extends traditional 2D estimated marginal means (EMMs) into interactive 3D Estim
 \seealso{
 Useful links:
 \itemize{
+  \item \url{https://aagi-aus.github.io/effectsurf/}
   \item \url{https://github.com/AAGI-AUS/effectsurf}
   \item Report bugs at \url{https://github.com/AAGI-AUS/effectsurf/issues}
 }
