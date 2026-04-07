@@ -1,0 +1,170 @@
+---
+title: "Getting Started with effectsurf"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Getting Started with effectsurf}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.width = 7,
+  fig.height = 5
+)
+```
+
+## What are Estimated Marginal Surfaces (EMS)?
+
+Traditional Estimated Marginal Means (EMMs) show how a predicted outcome
+changes along **one** variable at a time. This is a 1D slice of a
+potentially complex response landscape. When two variables interact, these
+1D slices can miss critical patterns --- saddle points, interaction ridges,
+and optimal management combinations that only become visible in 3D.
+
+**Estimated Marginal Surfaces (EMS)** extend EMMs to **two** continuous
+variables simultaneously, producing interactive 3D surfaces. Non-focal
+variables are marginalised (held at mean/mode), just as with EMMs.
+
+The `effectsurf` package makes this workflow model-agnostic and requires as
+few as **three lines of code**.
+
+## Installation
+
+```{r eval = FALSE}
+# Install from local source (during development)
+install.packages("effectsurf", repos = NULL, type = "source")
+```
+
+## Quick start: three lines to a 3D surface
+
+```{r quick-start}
+library(effectsurf)
+library(mgcv)
+
+# 1. Fit a model
+model <- gam(mpg ~ s(wt) + s(hp) + factor(cyl), data = mtcars)
+
+# 2. Create the prediction surface
+es <- surf_prediction(model, x = "wt", y = "hp",
+                      x_length = 30, y_length = 30)
+
+# 3. Inspect the object
+es
+```
+
+To visualise interactively (opens in your browser or RStudio Viewer):
+
+```{r plot-basic, eval = FALSE}
+plot(es)
+```
+
+## Stratified surfaces: comparing groups in 3D
+
+When you supply a `by` argument, each level of the categorical variable
+produces its own surface, overlaid with distinct colours:
+
+```{r stratified}
+es_strat <- surf_prediction(
+  model, x = "wt", y = "hp", by = "cyl",
+  x_length = 25, y_length = 25
+)
+es_strat
+```
+
+```{r plot-strat, eval = FALSE}
+plot(es_strat, opacity = 0.85)
+```
+
+The colourblind-safe palette (Wong, 2011) ensures accessibility. Each
+surface can be toggled on/off via the legend.
+
+## Using the bundled barley trials dataset
+
+`effectsurf` ships with `barley_trials` --- a simulated dataset based on
+patterns from Australian national barley agronomy trials:
+
+```{r barley-model}
+data(barley_trials)
+str(barley_trials)
+
+# Fit a GAM with smooth terms and variety type stratification
+barley_model <- gam(
+  yield ~ s(rainfall, k = 5) +
+    nitrogen + seedrate + variety_type + state +
+    nitrogen:variety_type +
+    s(trial, bs = "re"),
+  data = barley_trials,
+  method = "REML"
+)
+
+summary(barley_model)$r.sq
+```
+
+```{r barley-surface}
+# Create yield response surface: nitrogen x rainfall, by variety type
+es_barley <- surf_prediction(
+  barley_model,
+  x = "nitrogen", y = "rainfall",
+  by = "variety_type",
+  x_length = 30, y_length = 30,
+  labels = list(
+    x = "Nitrogen applied (kg/ha)",
+    y = "April-October rainfall (mm)",
+    z = "Grain yield (t/ha)",
+    title = "Yield response by variety type"
+  )
+)
+es_barley
+```
+
+```{r barley-plot, eval = FALSE}
+plot(es_barley, opacity = 0.85)
+```
+
+## 2D profile projections
+
+Extract publication-ready 2D slices from the 3D surface using
+`surf_profile()`:
+
+```{r profiles, fig.width = 7, fig.height = 4}
+# How does yield change with nitrogen at different rainfall levels?
+surf_profile(es_barley, along = "x", at = c(150, 300, 500))
+```
+
+## Finding the surface optimum
+
+```{r optimum}
+surf_optimum(es_barley, type = "max")
+```
+
+## Exporting to HTML
+
+Save a self-contained interactive HTML file for sharing:
+
+```{r export, eval = FALSE}
+surf_export(es_barley, path = "barley_yield_surface.html")
+```
+
+## Summary of key functions
+
+| Function | Purpose |
+|----------|---------|
+| `surf_prediction()` | 3D prediction surface |
+| `surf_comparison()` | Treatment effect difference surface |
+| `surf_slopes()` | Marginal effect (derivative) surface |
+| `surf_cate()` | CATE surface for causal models |
+| `surf_profile()` | 2D profile projections |
+| `surf_contour()` | 2D contour/heatmap |
+| `surf_sensitivity()` | Treatment effect landscape |
+| `surf_optimum()` | Surface maximum/minimum |
+| `surf_compare()` | Model comparison (difference) surface |
+| `surf_export()` | Export to self-contained HTML |
+
+## Next steps
+
+- **Vignette 2**: Stratified Surfaces --- comparing groups in 3D
+- **Vignette 3**: Treatment Effects in 3D --- from effect sizes to CATE
+- **Vignette 4**: Model-Agnostic Surfaces --- GAMs, mixed models, and ML

@@ -1,0 +1,13 @@
+^\.Rproj\.user$
+^effectsurf\.Rproj$
+^LICENSE\.md$
+^\.github$
+^data-raw$
+^_pkgdown\.yml$
+^docs$
+^pkgdown$
+^\.lintr$
+^codecov\.yml$
+^README\.Rmd$
+^CONTRIBUTING\.md$
+^CODE_OF_CONDUCT\.md$

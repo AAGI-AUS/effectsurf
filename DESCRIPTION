@@ -1,0 +1,52 @@
+Package: effectsurf
+Title: Interactive 3D Estimated Marginal Surfaces for Conditional Effect
+    Visualisation
+Version: 0.2.0.9000
+Authors@R: c(
+    person("Max", "Moldovan", , "max.moldovan@adelaide.edu.au",
+           role = c("aut", "cre", "cph"),
+           comment = c(ORCID = "0000-0001-9680-8474")),
+    person("Blakely", "Paynter", , "blakely.paynter@dpird.wa.gov.au",
+           role = "ctb")
+    )
+Description: Extends traditional 2D estimated marginal means (EMMs) into
+    interactive 3D Estimated Marginal Surfaces (EMS). Provides
+    model-agnostic visualisation of predictions, conditional effect sizes,
+    and conditional average treatment effects (CATE) from fitted
+    statistical models. Surfaces are rendered as interactive 'plotly' 3D
+    charts with categorical stratification, confidence envelopes, 2D
+    profile projections, and sensitivity analysis. Supports 100+ model
+    classes via 'marginaleffects', with optional 'gratia' integration for
+    GAM smooth surfaces.
+License: MIT + file LICENSE
+URL: https://github.com/AAGI-AUS/effectsurf
+BugReports: https://github.com/AAGI-AUS/effectsurf/issues
+Depends:
+    R (>= 4.1.0)
+Imports:
+    cli (>= 3.6.0),
+    data.table (>= 1.14.0),
+    htmlwidgets (>= 1.6.0),
+    marginaleffects (>= 0.20.0),
+    plotly (>= 4.10.0),
+    rlang (>= 1.1.0)
+Suggests:
+    brms,
+    covr,
+    emmeans (>= 1.10.0),
+    ggplot2 (>= 3.4.0),
+    gratia (>= 0.9.0),
+    knitr,
+    lme4,
+    mgcv,
+    rmarkdown,
+    testthat (>= 3.0.0),
+    viridisLite,
+    withr
+VignetteBuilder: knitr
+Config/testthat/edition: 3
+Encoding: UTF-8
+Language: en-GB
+LazyData: true
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.3.3
