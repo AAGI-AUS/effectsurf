@@ -107,7 +107,7 @@ plot.effectsurf <- function(x,
     if (!grepl("\\.html$", save_html, ignore.case = TRUE)) {
       save_html <- paste0(save_html, ".html")
     }
-    if (!grepl("^[/~]", save_html)) {
+    if (!grepl("^([/~]|[A-Za-z]:)", save_html)) {
       save_html <- file.path(getwd(), save_html)
     }
     dir_path <- dirname(save_html)
@@ -135,13 +135,28 @@ plot.effectsurf <- function(x,
 # ============================================================================
 
 #' Save plotly widget as self-contained HTML and remove leftover _files/ dir
+#'
+#' Uses a setwd() trick to work around a known htmlwidgets::saveWidget() bug
+#' where absolute paths get doubled on Windows (normalizePath concatenates
+#' the working directory with an already-absolute path).
 #' @noRd
 save_widget_clean <- function(widget, path) {
-  htmlwidgets::saveWidget(plotly::as_widget(widget), path)
+  # Ensure path is absolute and normalised
+  path <- normalizePath(path, mustWork = FALSE)
+  target_dir <- dirname(path)
+  target_file <- basename(path)
+
+  # setwd to target directory so saveWidget gets a relative filename
+
+  old_wd <- setwd(target_dir)
+  on.exit(setwd(old_wd), add = TRUE)
+
+  htmlwidgets::saveWidget(plotly::as_widget(widget), target_file)
+
   # htmlwidgets::saveWidget always creates a _files/ directory first,
   # then inlines via pandoc, but sometimes fails to delete the leftovers.
   # Remove it explicitly to keep the output directory clean.
-  files_dir <- paste0(tools::file_path_sans_ext(path), "_files")
+  files_dir <- paste0(tools::file_path_sans_ext(target_file), "_files")
   if (dir.exists(files_dir)) {
     unlink(files_dir, recursive = TRUE, force = TRUE)
   }
